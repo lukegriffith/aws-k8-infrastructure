@@ -37,21 +37,19 @@ data "aws_vpc" "main" {
 
 resource "aws_subnet" "az1" {
   vpc_id     = "${data.aws_vpc.main.id}"
-  cidr_block = "10.10.1.0/24"
+  cidr_block = "10.20.0.0/25"
   availability_zone = "eu-west-1a"
-  tags = "${local.tags}"
+  //tags = "${local.tags}"
 
-  depends_on = ["aws_internet_gateway.gw"]
 }
 
 
 resource "aws_subnet" "az2" {
   vpc_id     = "${data.aws_vpc.main.id}"
-  cidr_block = "10.10.2.0/24"
+  cidr_block = "10.20.0.128/25"
   availability_zone = "eu-west-1b"
-  tags = "${local.tags}"
+  //tags = "${local.tags}"
 
-  depends_on = ["aws_internet_gateway.gw"]
 }
 
 resource "aws_security_group" "allow_ssh" {
@@ -66,7 +64,7 @@ resource "aws_security_group" "allow_ssh" {
     cidr_blocks = ["0.0.0.0/0"]
   }
 
-  tags = "${local.tags}"
+  //tags = "${local.tags}"
 }
 
 resource "aws_security_group" "allow_all" {
@@ -87,6 +85,14 @@ resource "aws_security_group" "allow_all" {
     protocol        = "-1"
     self = "true"
   }
+
+  
+  egress {
+    from_port       = 0
+    to_port         = 0
+    protocol        = "-1"
+    cidr_blocks = [ "0.0.0.0/0"]
+  }
 }
 
 module "ec2_cluster_az1" {
@@ -101,7 +107,7 @@ module "ec2_cluster_az1" {
   monitoring             = false
   vpc_security_group_ids = ["${aws_security_group.allow_all.id}"]
   subnet_id              = "${aws_subnet.az1.id}"
-  tags = "${local.tags}"  
+  //tags = "${local.tags}"  
 }   
 
 
@@ -117,7 +123,7 @@ module "ec2_cluster_az2" {
   monitoring             = false
   vpc_security_group_ids = ["${aws_security_group.allow_all.id}"]
   subnet_id              = "${aws_subnet.az2.id}"
-  tags = "${local.tags}"
+  //tags = "${local.tags}"
 }   
 
 
@@ -135,101 +141,5 @@ module "bastion" {
   monitoring             = false
   vpc_security_group_ids = ["${aws_security_group.allow_ssh.id}", "${aws_security_group.allow_all.id}"]
   subnet_id              = "${aws_subnet.az1.id}"
-  tags = "${local.tags}"  
-}   
-
-
-resource "aws_internet_gateway" "gw" {
-  vpc_id = "${data.aws_vpc.main.id}"
-  tags = "${local.tags}"
-}
-
-resource "aws_route_table" "route_table" {
-  vpc_id = "${data.aws_vpc.main.id}"
-
-  route {
-    cidr_block = "0.0.0.0/0"
-    gateway_id = "${aws_internet_gateway.gw.id}"
-  }
-
-  route {
-    ipv6_cidr_block = "::/0"
-    gateway_id = "${aws_internet_gateway.gw.id}"
-  }
-
-  tags = "${local.tags}"
-}
-
-resource "aws_route_table_association" "a" {
-  subnet_id      = "${aws_subnet.az1.id}"
-  route_table_id = "${aws_route_table.route_table.id}"
-}
-
-resource "aws_route_table_association" "b" {
-  subnet_id      = "${aws_subnet.az2.id}"
-  route_table_id = "${aws_route_table.route_table.id}"
-}
-
-
-
-resource "aws_default_network_acl" "main" {
-  default_network_acl_id  = "${data.aws_vpc.main.default_network_acl_id}"
-
-  egress {
-    protocol   = "tcp"
-    rule_no    = 201
-    action     = "allow"
-    cidr_block = "0.0.0.0/0"
-    from_port  = 80
-    to_port    = 80
-  }
-
-  egress {
-    protocol   = "tcp"
-    rule_no    = 202
-    action     = "allow"
-    cidr_block = "0.0.0.0/0"
-    from_port  = 443
-    to_port    = 443
-  }
-
-  egress {
-    protocol   = "tcp"
-    rule_no    = 203
-    action     = "allow"
-    cidr_block = "0.0.0.0/0"
-    from_port  = 32768
-    to_port    = 65535
-  }
-
-  ingress {
-    protocol   = "tcp"
-    rule_no    = 100
-    action     = "allow"
-    cidr_block = "0.0.0.0/0"
-    from_port  = 80
-    to_port    = 80
-  }
-
-  ingress {
-    protocol   = "tcp"
-    rule_no    = 101
-    action     = "allow"
-    cidr_block = "0.0.0.0/0"
-    from_port  = 443
-    to_port    = 443
-  }
-
-
-  ingress {
-    protocol   = "tcp"
-    rule_no    = 102
-    action     = "allow"
-    cidr_block = "0.0.0.0/0"
-    from_port  = 22
-    to_port    = 22
-  }
-
-
-  tags = "${local.tags}"
+  //tags = "${local.tags}"  
 }   
