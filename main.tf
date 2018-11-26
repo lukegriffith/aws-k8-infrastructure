@@ -7,7 +7,7 @@ locals {
     tags = {
         Terraform = "true"
         Owner = "lg"
-        Env = "k8s"
+        Env = ["k8s"]
     }
     ami = "ami-0bdb1d6c15a40392c"
 }
@@ -19,18 +19,24 @@ resource "aws_key_pair" "deployer" {
 }
 
 
-resource "aws_vpc" "main" {
-  cidr_block = "10.10.0.0/21"
-  tags {
-      Name = "k8sVPC"
-      Terraform = "true"
-      Owner = "lg"
-      Env = "k8s"
-  }
+//resource "aws_vpc" "main" {
+//  cidr_block = "10.10.0.0/21"
+//  tags {
+//      Name = "k8sVPC"
+//      Terraform = "true"
+//      Owner = "lg"
+//      Env = "k8s"
+//  }
+//}
+//
+
+data "aws_vpc" "main" {
+  id = "vpc-0217640c851aa58b9"
 }
 
+
 resource "aws_subnet" "az1" {
-  vpc_id     = "${aws_vpc.main.id}"
+  vpc_id     = "${data.aws_vpc_main.id}"
   cidr_block = "10.10.1.0/24"
   availability_zone = "eu-west-1a"
   tags = "${local.tags}"
@@ -40,7 +46,7 @@ resource "aws_subnet" "az1" {
 
 
 resource "aws_subnet" "az2" {
-  vpc_id     = "${aws_vpc.main.id}"
+  vpc_id     = "${data.aws_vpc_main.id}"
   cidr_block = "10.10.2.0/24"
   availability_zone = "eu-west-1b"
   tags = "${local.tags}"
@@ -51,7 +57,7 @@ resource "aws_subnet" "az2" {
 resource "aws_security_group" "allow_ssh" {
   name        = "allow_ssh"
   description = "Allow ssh inbound traffic"
-  vpc_id      = "${aws_vpc.main.id}"
+  vpc_id      = "${data.aws_vpc_main.id}"
 
   ingress {
     from_port   = 22
@@ -66,7 +72,7 @@ resource "aws_security_group" "allow_ssh" {
 resource "aws_security_group" "allow_all" {
   name        = "allow_all"
   description = "Allow all inbound traffic"
-  vpc_id      = "${aws_vpc.main.id}"
+  vpc_id      = "${data.aws_vpc_main.id}"
 
   ingress {
     from_port   = 0
@@ -95,7 +101,7 @@ module "ec2_cluster_az1" {
   monitoring             = false
   vpc_security_group_ids = ["${aws_security_group.allow_all.id}"]
   subnet_id              = "${aws_subnet.az1.id}"
-  tags = "${local.tags}"
+  tags = "${local.tags}"  
 }   
 
 
@@ -134,12 +140,12 @@ module "bastion" {
 
 
 resource "aws_internet_gateway" "gw" {
-  vpc_id = "${aws_vpc.main.id}"
+  vpc_id = "${data.aws_vpc_main.id}"
   tags = "${local.tags}"
 }
 
 resource "aws_route_table" "route_table" {
-  vpc_id = "${aws_vpc.main.id}"
+  vpc_id = "${data.aws_vpc_main.id}"
 
   route {
     cidr_block = "0.0.0.0/0"
@@ -167,7 +173,7 @@ resource "aws_route_table_association" "b" {
 
 
 resource "aws_default_network_acl" "main" {
-  default_network_acl_id  = "${aws_vpc.main.default_network_acl_id}"
+  default_network_acl_id  = "${data.aws_vpc_main.default_network_acl_id}"
 
   egress {
     protocol   = "tcp"
