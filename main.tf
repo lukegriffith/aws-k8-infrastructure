@@ -37,7 +37,7 @@ resource "aws_vpc" "main" {
 
 resource "aws_subnet" "az1" {
   vpc_id     = "${aws_vpc.main.id}"
-  cidr_block = "10.20.0.0/25"
+  cidr_block = "10.10.0.0/25"
   availability_zone = "eu-west-1a"
   //tags = "${local.tags}"
 
@@ -46,7 +46,7 @@ resource "aws_subnet" "az1" {
 
 resource "aws_subnet" "az2" {
   vpc_id     = "${aws_vpc.main.id}"
-  cidr_block = "10.20.0.128/25"
+  cidr_block = "10.10.0.128/25"
   availability_zone = "eu-west-1b"
   //tags = "${local.tags}"
 
