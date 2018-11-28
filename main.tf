@@ -100,6 +100,7 @@ module "ec2_cluster_az1" {
 
   name           = "kubeNode"
   instance_count = 3
+  associate_public_ip_address = "true"
 
   ami                    = "${local.ami}"
   instance_type          = "t2.medium"
@@ -116,6 +117,7 @@ module "ec2_cluster_az2" {
 
   name           = "kubeNode"
   instance_count = 3
+  associate_public_ip_address = "true"
 
   ami                    = "${local.ami}"
   instance_type          = "t2.medium"
