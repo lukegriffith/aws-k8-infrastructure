@@ -19,24 +19,24 @@ resource "aws_key_pair" "deployer" {
 }
 
 
-//resource "aws_vpc" "main" {
-//  cidr_block = "10.10.0.0/21"
-//  tags {
-//      Name = "k8sVPC"
-//      Terraform = "true"
-//      Owner = "lg"
-//      Env = "k8s"
-//  }
-//}
-//
-
-data "aws_vpc" "main" {
-  id = "vpc-0217640c851aa58b9"
+resource "aws_vpc" "main" {
+  cidr_block = "10.10.0.0/21"
+  tags {
+      Name = "k8sVPC"
+      Terraform = "true"
+      Owner = "lg"
+      Env = "k8s"
+  }
 }
 
 
+//data "aws_vpc" "main" {
+//  id = "vpc-0217640c851aa58b9"
+//}
+
+
 resource "aws_subnet" "az1" {
-  vpc_id     = "${data.aws_vpc.main.id}"
+  vpc_id     = "${aws_vpc.main.id}"
   cidr_block = "10.20.0.0/25"
   availability_zone = "eu-west-1a"
   //tags = "${local.tags}"
@@ -45,7 +45,7 @@ resource "aws_subnet" "az1" {
 
 
 resource "aws_subnet" "az2" {
-  vpc_id     = "${data.aws_vpc.main.id}"
+  vpc_id     = "${aws_vpc.main.id}"
   cidr_block = "10.20.0.128/25"
   availability_zone = "eu-west-1b"
   //tags = "${local.tags}"
@@ -55,7 +55,7 @@ resource "aws_subnet" "az2" {
 resource "aws_security_group" "allow_ssh" {
   name        = "allow_ssh"
   description = "Allow ssh inbound traffic"
-  vpc_id      = "${data.aws_vpc.main.id}"
+  vpc_id      = "${aws_vpc.main.id}"
 
   ingress {
     from_port   = 22
@@ -70,7 +70,7 @@ resource "aws_security_group" "allow_ssh" {
 resource "aws_security_group" "allow_all" {
   name        = "allow_all"
   description = "Allow all inbound traffic"
-  vpc_id      = "${data.aws_vpc.main.id}"
+  vpc_id      = "${aws_vpc.main.id}"
 
   ingress {
     from_port   = 0
