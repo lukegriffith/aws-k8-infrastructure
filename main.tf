@@ -15,7 +15,7 @@ locals {
 
 resource "aws_key_pair" "deployer" {
   key_name   = "configurer"
-  public_key = "ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABAQC0OHF4w5Vu8nR9L79e5snJfPnIx8PkskFFp+5nR1o+czVUTGyk7GmVCQKzUlmqW2jCc4P7zn5JisthMZJCZdMyfQ3OABPE3XMucasUn/JdmhiDHtBwjnVBDdEHjPXyMWpzoBizLKCy3ST/eq2aSvQBCYIDbf6MnYmMhqVXyZj0KKEusSRkmhOiHCmybiTywHw48D18kFTfA2dCcyTIvR2LJkrYVVZ/ipBqSPsJFxKw+ZVyS/kEEMiaS7ZksvV02FB7VMUS1WMZO+W/xtqk4+3wihcmfq9lhKfk9tbvyu6HwBDDEMxXMJ8jpNp8t/e6M9qKcIGmXbTfIwJ7XkArEcBN lukem@DESKTOP-K4ROOO4"
+  public_key = "${var.public_key}"
 }
 
 
